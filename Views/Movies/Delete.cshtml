@@ -1,0 +1,55 @@
+﻿@model Mission06_Atkinson.Models.ViewModels.MovieDisplayItem
+
+@{
+    ViewData["Title"] = "Delete Movie";
+}
+
+<div class="delete-page">
+    <h1 class="page-title">Delete Movie</h1>
+
+    <div class="delete-warning">
+        <p>Are you sure you want to delete this movie?</p>
+    </div>
+
+    <div class="movie-details">
+        <dl class="details-list">
+            <dt>Title:</dt>
+            <dd>@Model.Title</dd>
+
+            <dt>Category:</dt>
+            <dd>@Model.Category</dd>
+
+            <dt>Year:</dt>
+            <dd>@Model.Year</dd>
+
+            <dt>Director(s):</dt>
+            <dd>@Model.Directors</dd>
+
+            <dt>Rating:</dt>
+            <dd>@Model.Rating</dd>
+
+            <dt>Edited:</dt>
+            <dd>@(Model.Edited ? "Yes" : "No")</dd>
+
+            @if (!string.IsNullOrEmpty(Model.LentTo))
+            {
+                <dt>Lent To:</dt>
+                <dd>@Model.LentTo</dd>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <dt>Notes:</dt>
+                <dd>@Model.Notes</dd>
+            }
+        </dl>
+    </div>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="MovieId" />
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger">Delete Movie</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

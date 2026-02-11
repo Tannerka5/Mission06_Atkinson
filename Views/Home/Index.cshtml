@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="home-page">
+    <h1 class="page-title">The Joel Hilton Film Collection</h1>
+    <div class="hero-image">
+        <img src="~/images/JoelHiltonHeadshot.jpg" alt="Joel Hilton" />
+    </div>
+    <div class="home-actions">
+        <a asp-controller="Movies" asp-action="Index" class="btn btn-primary">Browse Collection</a>
+        <a asp-controller="Movies" asp-action="Create" class="btn btn-secondary">Add New Movie</a>
+    </div>
+</div>

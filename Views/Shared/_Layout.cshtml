@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - The Joel Hilton Film Collection</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-brand">
+                    <a asp-controller="Home" asp-action="Index">The Joel Hilton Film Collection</a>
+                </div>
+                <ul class="nav-menu">
+                    <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li><a asp-controller="Movies" asp-action="Index">Movie Collection</a></li>
+                    <li><a asp-controller="Movies" asp-action="Create">Add Movie</a></li>
+                    <li><a asp-controller="Home" asp-action="About">Get to Know Joel</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div class="container main-content">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 - The Joel Hilton Film Collection</p>
+        </div>
+    </footer>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

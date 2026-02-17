@@ -5,7 +5,7 @@ using Mission06_Atkinson.Data;
 using Mission06_Atkinson.Models;
 using Mission06_Atkinson.Models.ViewModels;
 
-namespace Mission06_YourLastName.Controllers
+namespace Mission06_Atkinson.Controllers
 {
     public class MoviesController : Controller
     {
@@ -21,8 +21,6 @@ namespace Mission06_YourLastName.Controllers
         {
             var moviesQuery = _context.Movies
                 .Include(m => m.Category)
-                .Include(m => m.MovieDirectors)
-                .ThenInclude(md => md.Director)
                 .AsQueryable();
 
             // Apply search filter
@@ -30,7 +28,7 @@ namespace Mission06_YourLastName.Controllers
             {
                 moviesQuery = moviesQuery.Where(m =>
                     m.Title.Contains(searchTerm) ||
-                    m.MovieDirectors.Any(md => md.Director!.DirectorName.Contains(searchTerm)));
+                    (m.Director != null && m.Director.Contains(searchTerm)));
             }
 
             // Apply category filter
@@ -49,8 +47,8 @@ namespace Mission06_YourLastName.Controllers
             moviesQuery = sortBy switch
             {
                 "title_desc" => moviesQuery.OrderByDescending(m => m.Title),
-                "year" => moviesQuery.OrderBy(m => m.StartYear),
-                "year_desc" => moviesQuery.OrderByDescending(m => m.StartYear),
+                "year" => moviesQuery.OrderBy(m => m.Year),
+                "year_desc" => moviesQuery.OrderByDescending(m => m.Year),
                 "category" => moviesQuery.OrderBy(m => m.Category!.CategoryName),
                 "rating" => moviesQuery.OrderBy(m => m.Rating),
                 _ => moviesQuery.OrderBy(m => m.Title)
@@ -65,10 +63,11 @@ namespace Mission06_YourLastName.Controllers
                     MovieId = m.MovieId,
                     Title = m.Title,
                     Category = m.Category?.CategoryName ?? "",
-                    Year = m.EndYear.HasValue ? $"{m.StartYear}-{m.EndYear}" : m.StartYear.ToString(),
-                    Directors = string.Join(", ", m.MovieDirectors.Select(md => md.Director!.DirectorName)),
-                    Rating = m.Rating,
-                    Edited = m.Edited,
+                    Year = m.Year.ToString(),
+                    Director = m.Director ?? "",
+                    Rating = m.Rating ?? "",
+                    Edited = m.Edited == 1,
+                    CopiedToPlex = m.CopiedToPlex == 1,
                     LentTo = m.LentTo,
                     Notes = m.Notes
                 }).ToList(),
@@ -77,7 +76,12 @@ namespace Mission06_YourLastName.Controllers
                 RatingFilter = ratingFilter,
                 SortBy = sortBy,
                 Categories = await _context.Categories.ToListAsync(),
-                Ratings = await _context.Movies.Select(m => m.Rating).Distinct().OrderBy(r => r).ToListAsync()
+                Ratings = await _context.Movies
+                    .Where(m => m.Rating != null)
+                    .Select(m => m.Rating!)
+                    .Distinct()
+                    .OrderBy(r => r)
+                    .ToListAsync()
             };
 
             return View(viewModel);
@@ -107,45 +111,12 @@ namespace Mission06_YourLastName.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Add the movie
                 _context.Movies.Add(viewModel.Movie);
-                await _context.SaveChangesAsync();
-
-                // Process directors
-                var directorNames = viewModel.DirectorNames
-                    .Split(',')
-                    .Select(d => d.Trim())
-                    .Where(d => !string.IsNullOrWhiteSpace(d))
-                    .ToList();
-
-                foreach (var directorName in directorNames)
-                {
-                    // Check if director exists
-                    var director = await _context.Directors
-                        .FirstOrDefaultAsync(d => d.DirectorName == directorName);
-
-                    if (director == null)
-                    {
-                        // Create new director
-                        director = new Director { DirectorName = directorName };
-                        _context.Directors.Add(director);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    // Create the relationship
-                    var movieDirector = new MovieDirector
-                    {
-                        MovieId = viewModel.Movie.MovieId,
-                        DirectorId = director.DirectorId
-                    };
-                    _context.MovieDirectors.Add(movieDirector);
-                }
-
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            // If we got this far, something failed, reload the form
+            // Reload dropdowns if validation fails
             viewModel.Categories = await _context.Categories
                 .Select(c => new SelectListItem
                 {
@@ -165,10 +136,7 @@ namespace Mission06_YourLastName.Controllers
                 return NotFound();
             }
 
-            var movie = await _context.Movies
-                .Include(m => m.MovieDirectors)
-                .ThenInclude(md => md.Director)
-                .FirstOrDefaultAsync(m => m.MovieId == id);
+            var movie = await _context.Movies.FindAsync(id);
 
             if (movie == null)
             {
@@ -178,7 +146,6 @@ namespace Mission06_YourLastName.Controllers
             var viewModel = new MovieFormViewModel
             {
                 Movie = movie,
-                DirectorNames = string.Join(", ", movie.MovieDirectors.Select(md => md.Director!.DirectorName)),
                 Categories = await _context.Categories
                     .Select(c => new SelectListItem
                     {
@@ -206,40 +173,6 @@ namespace Mission06_YourLastName.Controllers
                 try
                 {
                     _context.Update(viewModel.Movie);
-
-                    // Remove existing director relationships
-                    var existingRelationships = await _context.MovieDirectors
-                        .Where(md => md.MovieId == id)
-                        .ToListAsync();
-                    _context.MovieDirectors.RemoveRange(existingRelationships);
-
-                    // Add new director relationships
-                    var directorNames = viewModel.DirectorNames
-                        .Split(',')
-                        .Select(d => d.Trim())
-                        .Where(d => !string.IsNullOrWhiteSpace(d))
-                        .ToList();
-
-                    foreach (var directorName in directorNames)
-                    {
-                        var director = await _context.Directors
-                            .FirstOrDefaultAsync(d => d.DirectorName == directorName);
-
-                        if (director == null)
-                        {
-                            director = new Director { DirectorName = directorName };
-                            _context.Directors.Add(director);
-                            await _context.SaveChangesAsync();
-                        }
-
-                        var movieDirector = new MovieDirector
-                        {
-                            MovieId = viewModel.Movie.MovieId,
-                            DirectorId = director.DirectorId
-                        };
-                        _context.MovieDirectors.Add(movieDirector);
-                    }
-
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -256,6 +189,7 @@ namespace Mission06_YourLastName.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Reload dropdowns if validation fails
             viewModel.Categories = await _context.Categories
                 .Select(c => new SelectListItem
                 {
@@ -277,8 +211,6 @@ namespace Mission06_YourLastName.Controllers
 
             var movie = await _context.Movies
                 .Include(m => m.Category)
-                .Include(m => m.MovieDirectors)
-                .ThenInclude(md => md.Director)
                 .FirstOrDefaultAsync(m => m.MovieId == id);
 
             if (movie == null)
@@ -291,10 +223,11 @@ namespace Mission06_YourLastName.Controllers
                 MovieId = movie.MovieId,
                 Title = movie.Title,
                 Category = movie.Category?.CategoryName ?? "",
-                Year = movie.EndYear.HasValue ? $"{movie.StartYear}-{movie.EndYear}" : movie.StartYear.ToString(),
-                Directors = string.Join(", ", movie.MovieDirectors.Select(md => md.Director!.DirectorName)),
-                Rating = movie.Rating,
-                Edited = movie.Edited,
+                Year = movie.Year.ToString(),
+                Director = movie.Director ?? "",
+                Rating = movie.Rating ?? "",
+                Edited = movie.Edited == 1,
+                CopiedToPlex = movie.CopiedToPlex == 1,
                 LentTo = movie.LentTo,
                 Notes = movie.Notes
             };
@@ -307,13 +240,10 @@ namespace Mission06_YourLastName.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var movie = await _context.Movies
-                .Include(m => m.MovieDirectors)
-                .FirstOrDefaultAsync(m => m.MovieId == id);
+            var movie = await _context.Movies.FindAsync(id);
 
             if (movie != null)
             {
-                _context.MovieDirectors.RemoveRange(movie.MovieDirectors);
                 _context.Movies.Remove(movie);
                 await _context.SaveChangesAsync();
             }

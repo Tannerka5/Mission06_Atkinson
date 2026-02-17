@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using Mission06_Atkinson.Models;
-using System.ComponentModel.DataAnnotations;
 
 namespace Mission06_Atkinson.Models.ViewModels
 {
@@ -9,10 +7,6 @@ namespace Mission06_Atkinson.Models.ViewModels
         public Movie Movie { get; set; } = new Movie();
         public List<SelectListItem> Categories { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> Ratings { get; set; } = new List<SelectListItem>();
-
-        [Required(ErrorMessage = "At least one director is required")]
-        [Display(Name = "Director(s)")]
-        public string DirectorNames { get; set; } = string.Empty;
 
         public static List<SelectListItem> GetAllRatings()
         {
@@ -27,8 +21,7 @@ namespace Mission06_Atkinson.Models.ViewModels
                 new SelectListItem { Value = "TV-G", Text = "TV-G" },
                 new SelectListItem { Value = "TV-PG", Text = "TV-PG" },
                 new SelectListItem { Value = "TV-14", Text = "TV-14" },
-                new SelectListItem { Value = "TV-Y7", Text = "TV-Y7" },
-                new SelectListItem { Value = "R?", Text = "R?" }
+                new SelectListItem { Value = "TV-Y7", Text = "TV-Y7" }
             };
         }
     }

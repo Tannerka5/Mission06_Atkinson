@@ -1,42 +1,56 @@
-using Mission06_Atkinson.Models;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Mission06_Atkinson.Models
 {
+    [Table("Movies")]
     public class Movie
     {
+        [Key]
         public int MovieId { get; set; }
 
         [Required(ErrorMessage = "Category is required")]
         public int CategoryId { get; set; }
 
         [Required(ErrorMessage = "Title is required")]
-        [Display(Name = "Movie Title")]
         public string Title { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Start Year is required")]
-        [Display(Name = "Year (Start)")]
-        [Range(1800, 2100, ErrorMessage = "Please enter a valid year")]
-        public int StartYear { get; set; }
+        [Required(ErrorMessage = "Year is required")]
+        [Range(1888, 2100, ErrorMessage = "Year must be between 1888 and 2100")]
+        public int Year { get; set; }
 
-        [Display(Name = "Year (End)")]
-        [Range(1800, 2100, ErrorMessage = "Please enter a valid year")]
-        public int? EndYear { get; set; }
+        public string? Director { get; set; }
 
-        [Required(ErrorMessage = "Rating is required")]
-        public string Rating { get; set; } = string.Empty;
+        public string? Rating { get; set; }
 
-        [Display(Name = "Edited Version")]
-        public bool Edited { get; set; } = false;
+        [Required(ErrorMessage = "Edited field is required")]
+        public int Edited { get; set; }
 
-        [Display(Name = "Lent To")]
         public string? LentTo { get; set; }
 
-        [StringLength(25, ErrorMessage = "Notes cannot exceed 25 characters")]
+        [Required(ErrorMessage = "Copied to Plex field is required")]
+        [Display(Name = "Copied to Plex")]
+        public int CopiedToPlex { get; set; }
+
         public string? Notes { get; set; }
 
-        // Navigation properties
+        // Navigation property
         public Category? Category { get; set; }
-        public ICollection<MovieDirector> MovieDirectors { get; set; } = new List<MovieDirector>();
+
+        // Helper properties for checkboxes (not mapped to database)
+        [NotMapped]
+        public bool EditedCheckbox
+        {
+            get => Edited == 1;
+            set => Edited = value ? 1 : 0;
+        }
+
+        [NotMapped]
+        [Display(Name = "Copied to Plex")]
+        public bool CopiedToPlexCheckbox
+        {
+            get => CopiedToPlex == 1;
+            set => CopiedToPlex = value ? 1 : 0;
+        }
     }
 }

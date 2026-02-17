@@ -4,87 +4,91 @@
     ViewData["Title"] = "Edit Movie";
 }
 
-<div class="form-page">
-    <h1 class="page-title">Edit Movie</h1>
-
-    <form asp-action="Edit" method="post" class="movie-form">
-        <input type="hidden" asp-for="Movie.MovieId" />
-        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label asp-for="Movie.Title"></label>
-                <input asp-for="Movie.Title" class="form-control" />
-                <span asp-validation-for="Movie.Title" class="text-danger"></span>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h2 class="mb-0">Edit Movie</h2>
             </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Movie.MovieId" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-            <div class="form-group">
-                <label asp-for="Movie.CategoryId">Category</label>
-                <select asp-for="Movie.CategoryId" asp-items="Model.Categories" class="form-control">
-                    <option value="">-- Select Category --</option>
-                </select>
-                <span asp-validation-for="Movie.CategoryId" class="text-danger"></span>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Movie.Title" class="form-label"></label>
+                            <input asp-for="Movie.Title" class="form-control" />
+                            <span asp-validation-for="Movie.Title" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Movie.CategoryId" class="form-label">Category</label>
+                            <select asp-for="Movie.CategoryId" asp-items="Model.Categories" class="form-select">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="Movie.CategoryId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Movie.Year" class="form-label"></label>
+                            <input asp-for="Movie.Year" type="number" class="form-control" min="1888" />
+                            <span asp-validation-for="Movie.Year" class="text-danger"></span>
+                            <small class="form-text text-muted">Must be 1888 or later</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Movie.Director" class="form-label"></label>
+                            <input asp-for="Movie.Director" class="form-control" placeholder="Optional" />
+                            <span asp-validation-for="Movie.Director" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Movie.Rating" class="form-label"></label>
+                            <select asp-for="Movie.Rating" asp-items="Model.Ratings" class="form-select">
+                                <option value="">-- Select Rating --</option>
+                            </select>
+                            <span asp-validation-for="Movie.Rating" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Movie.LentTo" class="form-label"></label>
+                            <input asp-for="Movie.LentTo" class="form-control" placeholder="Optional" />
+                            <span asp-validation-for="Movie.LentTo" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Movie.Notes" class="form-label"></label>
+                        <input asp-for="Movie.Notes" class="form-control" placeholder="Optional" />
+                        <span asp-validation-for="Movie.Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input asp-for="Movie.EditedCheckbox" type="checkbox" class="form-check-input" />
+                                <label asp-for="Movie.EditedCheckbox" class="form-check-label">Edited</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input asp-for="Movie.CopiedToPlexCheckbox" type="checkbox" class="form-check-input" />
+                                <label asp-for="Movie.CopiedToPlexCheckbox" class="form-check-label">Copied to Plex</label>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">Save Changes</button>
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
             </div>
         </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label asp-for="Movie.StartYear"></label>
-                <input asp-for="Movie.StartYear" type="number" class="form-control" />
-                <span asp-validation-for="Movie.StartYear" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Movie.EndYear"></label>
-                <input asp-for="Movie.EndYear" type="number" class="form-control" placeholder="Optional" />
-                <span asp-validation-for="Movie.EndYear" class="text-danger"></span>
-                <small class="form-text">Leave blank for single year</small>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label asp-for="DirectorNames"></label>
-                <input asp-for="DirectorNames" class="form-control" placeholder="e.g., Steven Spielberg, George Lucas" />
-                <span asp-validation-for="DirectorNames" class="text-danger"></span>
-                <small class="form-text">Separate multiple directors with commas</small>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Movie.Rating"></label>
-                <select asp-for="Movie.Rating" asp-items="Model.Ratings" class="form-control">
-                    <option value="">-- Select Rating --</option>
-                </select>
-                <span asp-validation-for="Movie.Rating" class="text-danger"></span>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label asp-for="Movie.LentTo"></label>
-                <input asp-for="Movie.LentTo" class="form-control" placeholder="Optional" />
-                <span asp-validation-for="Movie.LentTo" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Movie.Notes"></label>
-                <input asp-for="Movie.Notes" class="form-control" maxlength="25" placeholder="Optional (max 25 characters)" />
-                <span asp-validation-for="Movie.Notes" class="text-danger"></span>
-            </div>
-        </div>
-
-        <div class="form-group checkbox-group">
-            <label>
-                <input asp-for="Movie.Edited" type="checkbox" />
-                <span asp-for="Movie.Edited"></span>
-            </label>
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
